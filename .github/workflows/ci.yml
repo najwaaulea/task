@@ -30,8 +30,8 @@ jobs:
       - name: Run Unit Tests
         run: |
           cd user-service
-          # --passWithNoTests mencegah error jika file .spec.ts belum lengkap
-          npm run test -- --passWithNoTests
+          # Gunakan npx untuk menghindari masalah permission pada binary jest
+          npx jest --passWithNoTests
 
       - name: Build Service
         run: |
