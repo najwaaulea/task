@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # Port komunikasi data
+      - "15672:15672" # Dashboard RabbitMQ (user/pass: guest)
+    networks:
+      - task-network
+
+  # Backend 1: User Service
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./user-service:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    networks:
+      - task-network
+
+  # Backend 2: Task Service
+  task-service:
+    build: ./task-service
+    container_name: task-service
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./task-service:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    networks:
+      - task-network
+
+networks:
+  task-network:
+    driver: bridge

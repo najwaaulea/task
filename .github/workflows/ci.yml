@@ -1,0 +1,39 @@
+name: User Service CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          # Caching akan mempercepat proses build berikutnya
+          cache: 'npm'
+          cache-dependency-path: 'user-service/package-lock.json'
+
+      - name: Install Dependencies
+        run: |
+          cd user-service
+          npm install
+
+      - name: Run Unit Tests
+        run: |
+          cd user-service
+          # --passWithNoTests mencegah error jika file .spec.ts belum lengkap
+          npm run test -- --passWithNoTests
+
+      - name: Build Service
+        run: |
+          cd user-service
+          npm run build
