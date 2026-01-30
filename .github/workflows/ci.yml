@@ -18,7 +18,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          # Caching akan mempercepat proses build berikutnya
           cache: 'npm'
           cache-dependency-path: 'user-service/package-lock.json'
 
@@ -27,11 +26,13 @@ jobs:
           cd user-service
           npm install
 
+      - name: Set Permissions
+        run: chmod -R +x user-service/node_modules/.bin
+
       - name: Run Unit Tests
         run: |
           cd user-service
-          # Gunakan npx untuk menghindari masalah permission pada binary jest
-          npx jest --passWithNoTests
+          npm test -- --passWithNoTests
 
       - name: Build Service
         run: |
