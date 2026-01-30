@@ -48,6 +48,17 @@ services:
     networks:
       - task-network
 
+  frontend:
+    build: ./frontend-laravel
+    container_name: frontend-laravel
+    ports:
+      - "8000:80"
+    volumes:
+      - ./frontend-laravel:/var/www/html
+      - /var/www/html/vendor  # <-- Mengunci vendor
+    networks:
+      - task-network
+      
 networks:
   task-network:
     driver: bridge
