@@ -1,17 +1,21 @@
 version: '3.8'
 
 services:
-  # Message Broker
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"   # Port komunikasi data
-      - "15672:15672" # Dashboard RabbitMQ (user/pass: guest)
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - task-network
+    # Tambahkan ini agar backend tahu kapan RabbitMQ siap
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Backend 1: User Service
   user-service:
     build: ./user-service
     container_name: user-service
@@ -23,11 +27,11 @@ services:
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy # Menunggu RabbitMQ benar-benar "Healthy"
     networks:
       - task-network
 
-  # Backend 2: Task Service
   task-service:
     build: ./task-service
     container_name: task-service
@@ -39,7 +43,8 @@ services:
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     networks:
       - task-network
 
